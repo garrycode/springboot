@@ -40,8 +40,17 @@
 			<scope>provided</scope>
 		</dependency>
 		<!--jsp支持 、tomcat 的支持. -->
+
+		<!-- 热部署 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<!-- 热部署 -->
 	</dependencies>
 	<modules>
 		<module>springboot-hello</module>
+		<module>springboot-jsp</module>
 	</modules>
 </project>
