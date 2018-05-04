@@ -52,5 +52,6 @@
 	<modules>
 		<module>springboot-hello</module>
 		<module>springboot-jsp</module>
+		<module>springboot-log</module>
 	</modules>
 </project>
