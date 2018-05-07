@@ -1,7 +1,12 @@
 package com.qianpen.mybatis.config;
+
+import com.alibaba.druid.filter.stat.StatFilter;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
+import com.alibaba.druid.wall.WallConfig;
+import com.alibaba.druid.wall.WallFilter;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -13,7 +18,7 @@ import java.sql.SQLException;
 
 @Configuration
 public class DruidConfiguration {
-	
+
 	@Value("${spring.datasource.url}")
 	private String dbUrl;
 	@Value("${spring.datasource.username}")
@@ -50,7 +55,7 @@ public class DruidConfiguration {
 	private String filters;
 	@Value("${spring.datasource.connectionProperties}")
 	private String connectionProperties;
-	
+
 	@Value("${spring.druid.allowIps}")
 	private String allowIPs;
 	@Value("${spring.druid.denyIPs}")
@@ -60,8 +65,8 @@ public class DruidConfiguration {
 	@Value("${spring.druid.druidPassword}")
 	private String druidPassword;
 
-	//destroy-method="close"的作用是当数据库连接不使用的时候,就把该连接重新放到数据池中,方便下次使用调用
-	@Bean(destroyMethod =  "close") // 声明其为Bean实例
+	// destroy-method="close"的作用是当数据库连接不使用的时候,就把该连接重新放到数据池中,方便下次使用调用
+	@Bean(destroyMethod = "close") // 声明其为Bean实例
 	@Primary // 在同样的DataSource中，首先使用被标注的DataSource
 	public DataSource dataSource() {
 		DruidDataSource datasource = new DruidDataSource();
@@ -109,12 +114,31 @@ public class DruidConfiguration {
 	}
 
 	@Bean
-	public FilterRegistrationBean statFilter() {
+	public FilterRegistrationBean filterRegistrationBean() {
 		FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(new WebStatFilter());
 		// 添加过滤规则
 		filterRegistrationBean.addUrlPatterns("/*");
 		// 忽略过滤的格式
 		filterRegistrationBean.addInitParameter("exclusions", "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*");
 		return filterRegistrationBean;
+	}
+
+	@Bean
+	public StatFilter statFilter() {
+		StatFilter statFilter = new StatFilter();
+		statFilter.setLogSlowSql(true); // slowSqlMillis用来配置SQL慢的标准，执行时间超过slowSqlMillis的就是慢。
+		statFilter.setMergeSql(true); // SQL合并配置
+		statFilter.setSlowSqlMillis(1000);// slowSqlMillis的缺省值为3000，也就是3秒。
+		return statFilter;
+	}
+
+	@Bean
+	public WallFilter wallFilter() {
+		WallFilter wallFilter = new WallFilter();
+		// 允许执行多条SQL
+		WallConfig config = new WallConfig();
+		config.setMultiStatementAllow(true);
+		wallFilter.setConfig(config);
+		return wallFilter;
 	}
 }
